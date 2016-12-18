@@ -7,10 +7,13 @@ import net.prezz.smsalarmpanel.strategy.ArmPerimeterSmsCommandStrategy;
 import net.prezz.smsalarmpanel.strategy.DisarmSmsCommandStrategy;
 import net.prezz.smsalarmpanel.strategy.StatusSmsCommandStrategy;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.Menu;
@@ -28,6 +31,8 @@ import android.widget.Button;
  */
 
 public class MainActivity extends Activity {
+
+    private static final int PERMISSIONS_SEND_SMS = 3003;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -76,14 +81,28 @@ public class MainActivity extends Activity {
         return phoneNumber;
     }
 
-    private void startPreferenceActivity() {
-        startActivity(new Intent(this, PreferencesActivity.class));
-    }
-
     private void startConfirmActivity(AbstractSmsCommandStrategy smsCommandStrategy) {
         Intent intent = new Intent(MainActivity.this, ConfirmActivity.class);
         intent.putExtra(AbstractSmsCommandStrategy.class.getName(), smsCommandStrategy);
         startActivity(intent);
+    }
+
+    private void startPreferenceActivity() {
+        Context context = getApplicationContext();
+        if (context.checkSelfPermission(Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.SEND_SMS}, PERMISSIONS_SEND_SMS);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_SEND_SMS:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    startActivity(new Intent(this, PreferencesActivity.class));
+                }
+                break;
+        }
     }
 
     private final class ButtonCommandClickListener implements OnClickListener {
