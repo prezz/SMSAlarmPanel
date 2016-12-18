@@ -91,6 +91,8 @@ public class MainActivity extends Activity {
         Context context = getApplicationContext();
         if (context.checkSelfPermission(Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.SEND_SMS}, PERMISSIONS_SEND_SMS);
+        } else {
+            startActivity(new Intent(this, PreferencesActivity.class));
         }
     }
 
